@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Chat App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #chatBox {
+      max-width: 400px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    #messageList {
+      list-style: none;
+      padding: 0;
+    }
+
+    .message {
+      background-color: #f2f2f2;
+      padding: 5px 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    #messageInput {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-top: 10px;
+    }
+
+    #sendButton {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Chat App</h1>
+  <div id="chatBox">
+    <ul id="messageList"></ul>
+  </div>
+  <input type="text" id="usernameInput" placeholder="Your Username..." />
+  <input type="text" id="messageInput" placeholder="Type your message..." />
+  <button id="sendButton" onclick="sendMessage()">Send</button>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:3000');
+    const usernameInput = document.getElementById('usernameInput');
+
+    socket.onmessage = (event) => {
+      const messageList = document.getElementById('messageList');
+      const li = document.createElement('li');
+      li.classList.add('message');
+
+      const data = JSON.parse(event.data);
+      const timestamp = new Date(data.timestamp).toLocaleTimeString();
+      li.textContent = `[${timestamp}] ${data.username}: ${data.message}`;
+
+      messageList.appendChild(li);
+    };
+
+    function sendMessage() {
+      const username = usernameInput.value.trim();
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+      
+      if (username === '' || message === '') {
+        alert('Please enter your username and message.');
+        return;
+      }
+
+      const data = {
+        username: username,
+        message: message,
+        timestamp: new Date().toISOString(),
+      };
+      
+      socket.send(JSON.stringify(data));
+      messageInput.value = '';
+    }
+  </script>
+</body>
+</html>
